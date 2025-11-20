@@ -8,14 +8,23 @@ export default defineConfig({
 
   build: {
     outDir: "../dist",
+    emptyOutDir: true,
+
     rollupOptions: {
       input: {
         main: "src/index.html",
         catalog: "src/catalog.html",
-        library: "src/my-library.html"
+        library: "src/my-library.html",
       }
     }
   },
 
-  plugins: [injectHTML()]
+  plugins: [
+    injectHTML({
+      // partials klasörünü aktif olarak kullanabilmen için
+      injections: {
+        // örnek: <load src="partials/modals.html">
+      }
+    })
+  ],
 });
