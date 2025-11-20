@@ -1,5 +1,5 @@
 import { defineConfig } from "vite";
-import injectHTML from "vite-plugin-html-inject";
+import loadPartials from "./vite-plugin-load.js";
 
 export default defineConfig({
   root: "src",
@@ -12,19 +12,14 @@ export default defineConfig({
 
     rollupOptions: {
       input: {
-        main: "src/index.html",
+        home: "src/index.html",
         catalog: "src/catalog.html",
-        library: "src/my-library.html",
+        library: "src/my-library.html"
       }
     }
   },
 
   plugins: [
-    injectHTML({
-      // partials klasörünü aktif olarak kullanabilmen için
-      injections: {
-        // örnek: <load src="partials/modals.html">
-      }
-    })
-  ],
+    loadPartials()
+  ]
 });
