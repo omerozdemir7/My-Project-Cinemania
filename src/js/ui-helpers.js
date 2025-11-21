@@ -8,31 +8,38 @@ import {
 } from "./movies-data.js";
 import { openTrailerModal, openTrailerErrorModal } from "./trailer-modal.js";
 
-// NOT: setupModal ve setupTeamModal'ı burada çağırmıyoruz, 
-// onları main.js hallediyor. Burası sadece yardımcı fonksiyonlar.
-
 /* --- Yardımcılar --- */
 export function getGenresText(genreData) {
-  if (!genreData) return "N/A";
-  
-  // Detay sayfasından gelen veri (Obje dizisi)
-  if (Array.isArray(genreData) && genreData.length > 0 && typeof genreData[0] === "object") {
+  // 1. Veri yoksa veya dizi değilse
+  if (!genreData || !Array.isArray(genreData) || genreData.length === 0) {
+    return "N/A";
+  }
+
+  const firstItem = genreData[0];
+
+  // 2. Detay sayfasından gelen veri (Obje dizisi: [{name: "Action"}, ...])
+  // İlk eleman bir obje mi ve içinde 'name' özelliği var mı diye kontrol ediyoruz.
+  if (typeof firstItem === "object" && firstItem !== null && firstItem.name) {
     return genreData.map((g) => g.name).slice(0, 2).join(", ");
   }
 
-  // Listeden gelen veri (ID dizisi)
-  const genreMap = {
-    28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
-    80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
-    14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
-    9648: "Mystery", 10749: "Romance", 878: "Sci-Fi", 10770: "TV Movie",
-    53: "Thriller", 10752: "War", 37: "Western"
-  };
-
-  if (Array.isArray(genreData)) {
+  // 3. Listeden gelen veri (ID dizisi: [28, 12, ...])
+  // İlk eleman bir sayı ise ID haritasını kullanıyoruz.
+  if (typeof firstItem === "number") {
+    const genreMap = {
+      28: "Action", 12: "Adventure", 16: "Animation", 35: "Comedy",
+      80: "Crime", 99: "Documentary", 18: "Drama", 10751: "Family",
+      14: "Fantasy", 36: "History", 27: "Horror", 10402: "Music",
+      9648: "Mystery", 10749: "Romance", 878: "Sci-Fi", 10770: "TV Movie",
+      53: "Thriller", 10752: "War", 37: "Western"
+    };
+    
     const genres = genreData.map((id) => genreMap[id]).filter(Boolean);
-    return genres.slice(0, 2).join(", ") || "Other";
+    // Eğer eşleşen tür bulunursa döndür, yoksa "Other" yaz
+    return genres.length > 0 ? genres.slice(0, 2).join(", ") : "Other";
   }
+
+  // 4. Hiçbiri değilse (Örn: String dizisi gelirse)
   return "N/A";
 }
 
@@ -47,6 +54,7 @@ export function renderStars(vote) {
 
 /* --- Kart Render --- */
 export function renderMovieCard(movie) {
+  // API'den bazen genres, bazen genre_ids gelebilir. İkisini de kontrol et.
   const genreList = movie.genres || movie.genre_ids;
   const year = movie.release_date ? new Date(movie.release_date).getFullYear() : "N/A";
 
@@ -118,7 +126,6 @@ export async function updateHeroWithMovie(movieId, heroSection, heroContent) {
       detailBtn.onclick = (e) => {
         e.preventDefault();
         const id = e.target.dataset.id;
-        // main.js içinde window'a atadığımız fonksiyonu kullan
         if(window.openMovieModal) window.openMovieModal(id);
       };
     }
@@ -136,7 +143,7 @@ export function renderUpcomingSection(movie, container) {
   const voteAvg = movie.vote_average ? movie.vote_average.toFixed(1) : "N.A";
   const voteCount = movie.vote_count || 0;
   const popularity = movie.popularity ? movie.popularity.toFixed(1) : "N.A";
-  const genres = getGenresText(movie.genre_ids);
+  const genres = getGenresText(movie.genres || movie.genre_ids); // Burada da her ikisini kontrol et
   const imageUrl = getOriginalImageUrl(movie.backdrop_path || movie.poster_path);
   const library = JSON.parse(localStorage.getItem("myLibrary")) || [];
   const isAdded = library.includes(Number(movie.id));
