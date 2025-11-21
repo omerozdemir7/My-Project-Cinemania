@@ -305,14 +305,17 @@ body.light-mode .modal-close-btn:hover {
 }
 
 /* --- GLOBAL RESPONSIVE --- */
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .container {
-    padding: 0 28px;
+    padding: 0 32px;
+    max-width: 768px;
   }
 }
 
-@media (max-width: 480px) {
+/* 3. Desktop (1280px ve üzeri) */
+@media (min-width: 1280px) {
   .container {
-    padding: 0 16px;
+    padding: 0 20px;
+    max-width: 1280px;
   }
 }
